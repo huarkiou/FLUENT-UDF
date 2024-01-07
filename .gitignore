@@ -1,0 +1,9 @@
+.vscode
+.xmake
+build
+out
+*.pdb
+CMakeSettings.json
+compile_commands.json
+vsxmake*
+*_bak

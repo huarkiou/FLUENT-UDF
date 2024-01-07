@@ -1,0 +1,51 @@
+rule("udf.base")
+    on_load(function (target)
+        local FLUENT_DIM = get_config("FLUENT_DIM")
+        if FLUENT_DIM == nil then
+            raise([[Please add a line like "set_config("FLUENT_DIM", "2ddp")" to root xmake.lua file to decide the solution type!
+             Possible value are 2d, 3d, 2ddp or 3ddp ]])
+        else
+            target:data_set("fluent_dim", FLUENT_DIM)
+        end
+
+        local FLUENT_VERSION = get_config("FLUENT_VERSION")
+        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION)
+
+        import("genudfinfo")(target)
+    end)
+    on_config(function (target)
+        target:set("kind", "shared")
+    end)
+    before_build(function (target)
+        print("Build for fluent instance ".. target:data("fluent_path"))
+    end)
+    on_install(function (target)
+        local output_dir = path.join(target:installdir(), "libudf", target:data("fluent_arch"), target:data("solver_type"))
+        os.cp(path.join(target:targetdir(), target:name()..".dll"), path.join(output_dir, "libudf.dll"))
+        os.trycp(path.join(target:targetdir(), target:name()..".pdb"), path.join(output_dir, "libudf.pdb"))
+    end)
+rule_end()
+
+rule("udf.host")
+    add_deps("udf.base", {order = true})
+    on_config(function (target)
+        target:data_set("solver_type", target:data("fluent_dim").."_host")
+        import("fluentinfo").add_fluent_headers_and_links(target)
+    end)
+rule_end()
+
+rule("udf.node")
+    add_deps("udf.base", {order = true})
+    on_config(function (target)
+        target:data_set("solver_type", target:data("fluent_dim").."_node")
+        import("fluentinfo").add_fluent_headers_and_links(target)
+    end)
+rule_end()
+
+rule("udf.seq")
+    add_deps("udf.base", {order = true})
+    on_config(function (target)
+        target:data_set("solver_type", target:data("fluent_dim"))
+        import("fluentinfo").add_fluent_headers_and_links(target)
+    end)
+rule_end()
