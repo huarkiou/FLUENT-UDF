@@ -85,23 +85,24 @@ function add_fluent_headers_and_links(target)
     local fluent_release_path = path.join(fluent_path, "fluent"..fluent_version)
 
     local result = {}
-
     if solver_type:endswith("host") then
-        parallel_type = "net"
+        local comm = "net"
+        local parallel_node = "net"
         result.links = {"fl"..fluent_lib_release, "mport"}
         result.linkdirs = {
             path.join(fluent_release_path, fluent_arch, solver_type),
-            path.join(fluent_release_path, "multiport", fluent_arch, parallel_type, "shared")
+            path.join(fluent_release_path, "multiport", fluent_arch, parallel_node, "shared")
         }
     elseif solver_type:endswith("node") then
-        parallel_type = "mpi"
-        result.links = {"fl".."_mpi"..fluent_lib_release, "mport"}
+        local comm = "mpi"
+        -- PARALLEL_NODE = "none | smpi | vmpi | net | nmpi"
+        local parallel_node = "mpi"
+        result.links = {"fl_"..parallel_node..fluent_lib_release, "mport"}
         result.linkdirs = {
             path.join(fluent_release_path, fluent_arch, solver_type),
-            path.join(fluent_release_path, "multiport", fluent_arch, parallel_type, "shared")
+            path.join(fluent_release_path, "multiport", fluent_arch, comm, "shared")
         }
     else
-        parallel_type = "net"
         result.links = {"fl"..fluent_lib_release}
         result.linkdirs = {
             path.join(fluent_release_path, fluent_arch, solver_type)
