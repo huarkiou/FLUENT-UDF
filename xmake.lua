@@ -1,6 +1,6 @@
-add_rules("mode.debug", "mode.release")
+add_rules("mode.release", "mode.debug")
 
-set_config("FLUENT_VERSION", "21.2.0")
+-- set_config("FLUENT_VERSION", "21.2.0")
 set_config("FLUENT_DIM", "2ddp")
 
 local installdir ="$(buildir)/install"
