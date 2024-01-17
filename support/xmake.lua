@@ -9,7 +9,8 @@ rule("udf.base")
         end
 
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
-        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION)
+        local GPU_SUPPORT = get_config("GPU_SUPPORT")
+        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION, GPU_SUPPORT)
 
         import("genudfinfo")(target)
     end)

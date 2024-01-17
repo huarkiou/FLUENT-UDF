@@ -62,7 +62,7 @@ function guess_fluent_version(target)
     return fluent_version
 end
 
-function set_fluent_info(target, fluent_version)
+function set_fluent_info(target, fluent_version, gpu_support)
     local fluentinfo=import("fluentinfo")
     if fluent_version == nil then
         fluent_version = fluentinfo.guess_fluent_version()
@@ -70,6 +70,7 @@ function set_fluent_info(target, fluent_version)
     target:data_set("fluent_version", fluent_version)
     target:data_set("fluent_arch", get_fluent_arch())
     target:data_set("fluent_path", find_fluent_dir(target, fluent_version))
+    target:data_set("gpu_support", gpu_support)
 end
 
 function add_fluent_headers_and_links(target)
@@ -79,6 +80,7 @@ function add_fluent_headers_and_links(target)
     local fluent_version = target:data("fluent_version")
     local fluent_arch = target:data("fluent_arch")
     local fluent_path = target:data("fluent_path")
+    local gpu_support = target:data("gpu_support")
 
     local version_table = (fluent_version):split('.', {plain = true})
     local fluent_lib_release = version_table[1]..version_table[2]..version_table[3]
@@ -147,14 +149,11 @@ function add_fluent_headers_and_links(target)
         path.join(fluent_path, "include")
         }
 
-        -- 暂时不考虑GPU
-        -- GPU_LIB=
-        -- !IF ("$(GPU_SUPPORT)" == "on")
-        -- INCLUDES = $(INCLUDES) \
-        --            -I"$(FLUENT_INC)"\fluent$(RELEASE)\multiport\gpu_wrapper\include
-        -- GPU_LIB = OpenCL.lib
-        -- LIBS = $(LIBS) /Libpath:"$(FLUENT_INC)"\fluent$(RELEASE)\multiport\gpu_wrapper\$(FLUENT_ARCH)\stub
-        -- !ENDIF
+        if gpu_support == true then
+            table.insert(result.includedirs, path.join(fluent_release_path, "multiport", "gpu_wrapper", "include"))
+            table.insert(result.links, "OpenCL.lib")
+            table.insert(result.linkdirs, path.join(fluent_release_path, "multiport", "gpu_wrapper", fluent_arch, "stub"))
+        end
 
         target:add("sysincludedirs", result.includedirs)
         target:add("syslinks", result.links)
