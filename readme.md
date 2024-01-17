@@ -29,7 +29,7 @@
 
 ### Linux
 
-- 暂不支持，因为现在我用不到，而且在我的ARCHLINUX上装ANSYS太麻烦了。
+- 暂不支持，因为现在我用不到，而且在我的ARCHLINUX上装ANSYS太麻烦了。不过linux直接改makefile也还挺方便，直接到安装的Ansys目录里面找到"{ANSYS INSTALL DIR}/v241/fluent/fluent24.1.0/src/udf"，把里面的东西拷贝出来用按需求改一改然后直接用make生成也凑活。
 
 ## 基本示例
 
