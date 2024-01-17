@@ -21,3 +21,8 @@ target("libudf_host")
     add_includedirs("src")
     set_installdir(installdir)
 target_end()
+
+target("libudf")
+    set_kind("phony")
+    add_deps("libudf_host", "libudf_node")
+target()
