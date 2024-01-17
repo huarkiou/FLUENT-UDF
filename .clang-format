@@ -1,7 +1,7 @@
 # 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language: Cpp
 # 基础样式
-BasedOnStyle: LLVM
+BasedOnStyle: Google
 # 每行字符的限制，0表示没有限制
 ColumnLimit: 120
 #
