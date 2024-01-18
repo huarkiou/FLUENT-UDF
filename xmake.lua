@@ -1,8 +1,9 @@
 add_rules("mode.release", "mode.debug")
 
--- set_config("FLUENT_VERSION", "21.2.0")
+set_config("FLUENT_VERSION", "24.1.0")
 set_config("FLUENT_DIM", "2ddp")
 set_config("GPU_SUPPORT", false)
+set_config("PARALLEL_NODE", "smpi")
 
 local installdir ="$(buildir)/install"
 

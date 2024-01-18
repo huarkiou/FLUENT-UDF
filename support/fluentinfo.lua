@@ -62,7 +62,7 @@ function guess_fluent_version(target)
     return fluent_version
 end
 
-function set_fluent_info(target, fluent_version, gpu_support)
+function set_fluent_info(target, fluent_version)
     local fluentinfo=import("fluentinfo")
     if fluent_version == nil then
         fluent_version = fluentinfo.guess_fluent_version()
@@ -70,7 +70,6 @@ function set_fluent_info(target, fluent_version, gpu_support)
     target:data_set("fluent_version", fluent_version)
     target:data_set("fluent_arch", get_fluent_arch())
     target:data_set("fluent_path", find_fluent_dir(target, fluent_version))
-    target:data_set("gpu_support", gpu_support)
 end
 
 function add_fluent_headers_and_links(target)
@@ -81,6 +80,7 @@ function add_fluent_headers_and_links(target)
     local fluent_arch = target:data("fluent_arch")
     local fluent_path = target:data("fluent_path")
     local gpu_support = target:data("gpu_support")
+    local parallel_node = target:data("parallel_node")
 
     local version_table = (fluent_version):split('.', {plain = true})
     local fluent_lib_release = version_table[1]..version_table[2]..version_table[3]
@@ -89,16 +89,16 @@ function add_fluent_headers_and_links(target)
     local result = {}
     if solver_type:endswith("host") then
         local comm = "net"
-        local parallel_node = "net"
         result.links = {"fl"..fluent_lib_release, "mport"}
         result.linkdirs = {
             path.join(fluent_release_path, fluent_arch, solver_type),
-            path.join(fluent_release_path, "multiport", fluent_arch, parallel_node, "shared")
+            path.join(fluent_release_path, "multiport", fluent_arch, comm, "shared")
         }
     elseif solver_type:endswith("node") then
         local comm = "mpi"
-        -- PARALLEL_NODE = "none | smpi | vmpi | net | nmpi"
-        local parallel_node = "mpi"
+        if parallel_node ~= "none" and parallel_node ~= "net" then
+            parallel_node = "mpi"
+        end
         result.links = {"fl_"..parallel_node..fluent_lib_release, "mport"}
         result.linkdirs = {
             path.join(fluent_release_path, fluent_arch, solver_type),

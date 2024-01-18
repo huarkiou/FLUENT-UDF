@@ -9,14 +9,27 @@ rule("udf.base")
             target:data_set("fluent_dim", FLUENT_DIM)
         end
 
+        -- 检查fluent实例是否存在并设置相应的变量
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
+        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION)
+
+        local PARALLEL_NODE = get_config("PARALLEL_NODE")
+        if PARALLEL_NODE == nil then
+            raise([[Please add a line like "set_config("PARALLEL_NODE", "smpi")" to root xmake.lua file to decide the parallel node!
+             Possible value are none, smpi, vmpi, net, nmpi.
+                none: a serial version of the solver
+                smpi: parallel using shared memory (for multiprocessor machines)
+                vmpi: parallel using shared memory or network with vendor MPI software
+                net: parallel using network communicator with RSHD software]])
+        end
+        target:data_set("parallel_node", PARALLEL_NODE)
+
         local GPU_SUPPORT = get_config("GPU_SUPPORT")
         if GPU_SUPPORT == nil then
             GPU_SUPPORT = false
         end
+        target:data_set("gpu_support", GPU_SUPPORT)
 
-        -- 检查fluent实例是否存在并设置相应的变量
-        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION, GPU_SUPPORT)
 
         -- 生成udf_names.c和ud_io1.h
         import("genudfinfo")(target)
