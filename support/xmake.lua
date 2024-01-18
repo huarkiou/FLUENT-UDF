@@ -1,5 +1,6 @@
 rule("udf.base")
     on_load(function (target)
+        -- 检查基本参数的设置
         local FLUENT_DIM = get_config("FLUENT_DIM")
         if FLUENT_DIM == nil then
             raise([[Please add a line like "set_config("FLUENT_DIM", "2ddp")" to root xmake.lua file to decide the solution type!
@@ -10,11 +11,18 @@ rule("udf.base")
 
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
         local GPU_SUPPORT = get_config("GPU_SUPPORT")
+        if GPU_SUPPORT == nil then
+            GPU_SUPPORT = false
+        end
+
+        -- 检查fluent实例是否存在并设置相应的变量
         import("fluentinfo").set_fluent_info(target, FLUENT_VERSION, GPU_SUPPORT)
 
+        -- 生成udf_names.c和ud_io1.h
         import("genudfinfo")(target)
     end)
     on_config(function (target)
+        -- udf是动态链接库
         target:set("kind", "shared")
     end)
     before_build(function (target)

@@ -149,7 +149,7 @@ function add_fluent_headers_and_links(target)
         path.join(fluent_path, "include")
         }
 
-        if gpu_support == true then
+        if gpu_support then
             table.insert(result.includedirs, path.join(fluent_release_path, "multiport", "gpu_wrapper", "include"))
             table.insert(result.links, "OpenCL.lib")
             table.insert(result.linkdirs, path.join(fluent_release_path, "multiport", "gpu_wrapper", fluent_arch, "stub"))

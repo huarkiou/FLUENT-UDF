@@ -6,4 +6,4 @@ out
 CMakeSettings.json
 compile_commands.json
 vsxmake*
-*_bak
+*_private
