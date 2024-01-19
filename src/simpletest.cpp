@@ -8,6 +8,8 @@ extern "C"
 }
 /* clang-format on */
 
+constexpr int BOUNDARY_ID = 1;
+
 /* clang-format off */
 int a =3; double b =2;DEFINE_EXECUTE_ON_LOADING(on_loading, libname) {Message(" \n");double a[3]={0,};}
 /* clang-format on */
@@ -15,6 +17,31 @@ int a =3; double b =2;DEFINE_EXECUTE_ON_LOADING(on_loading, libname) {Message(" 
 DEFINE_ON_DEMAND(on_demand) {
 #if RP_HOST
     Message(" \n");
+#endif
+
+#if !RP_HOST
+
+    if (!Data_Valid_P()) return;
+    Domain *domain = Get_Domain(1);
+
+    Thread *ct;
+    thread_loop_c(ct, domain) {
+        Message("%d: cell %s\n", myid, ct->name);
+    }
+    Thread *ft;
+    thread_loop_f(ft, domain) {
+        Message("%d: face %s\n", myid, ft->name);
+    }
+
+    Thread *ft1 = Lookup_Thread(domain, BOUNDARY_ID);
+    face_t f;
+    Message("%d: %s\n", myid, ft1->name);
+    begin_f_loop(f, ft1) {}
+    end_f_loop(f, tf1);
+    cell_t c;
+    begin_c_loop(c, ft1) {}
+    end_c_loop(c, tf1);
+
 #endif
 }
 
@@ -30,17 +57,16 @@ DEFINE_CG_MOTION(cg_motion, dt, velocity, omega, time, dtime) {
 }
 
 DEFINE_EXECUTE_AT_END(exec_at_end) {
-    if (!Data_Valid_P())
-        return;
-    Domain *domain = Get_Domain(1);         // fluid domain pointer
-    Thread *tf1 = Lookup_Thread(domain, 1); // FSI boundary pointer
+    if (!Data_Valid_P()) return;
+    Domain *domain = Get_Domain(1);                    // fluid domain pointer
+    Thread *tf1 = Lookup_Thread(domain, BOUNDARY_ID);  // boundary pointer
     // calculate the force applied
     real x_cg[3], force[3], moment[3];
     N3V_D(x_cg, =, 0, 0, 0);
     Compute_Force_And_Moment(domain, tf1, x_cg, force, moment, TRUE);
 
-    real time = RP_Get_Real("flow-time");         // time(s)
-    real d_t = RP_Get_Real("physical-time-step"); // timestep size(s)
+    real time = RP_Get_Real("flow-time");          // time(s)
+    real d_t = RP_Get_Real("physical-time-step");  // timestep size(s)
 }
 
 std::string DATA_PATH_KEY{"/params"};
