@@ -44,6 +44,9 @@ rule("udf.base")
         print("Build for fluent instance ".. target:data("fluent_path"))
     end)
     on_install(function (target)
+        if target:installdir() == nil then
+            raise("Target install directory has not set yet! example usage: xmake install -o D:/path/to/install libudf")
+        end
         local output_dir = path.join(target:installdir(), "libudf", target:data("fluent_arch"), target:data("solver_type"))
         os.cp(path.join(target:targetdir(), target:name()..".dll"), path.join(output_dir, "libudf.dll"))
         os.trycp(path.join(target:targetdir(), target:name()..".pdb"), path.join(output_dir, "libudf.pdb"))
