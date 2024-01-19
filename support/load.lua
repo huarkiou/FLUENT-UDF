@@ -63,9 +63,8 @@ function guess_fluent_version(target)
 end
 
 function set_fluent_info(target, fluent_version)
-    local fluentinfo=import("fluentinfo")
     if fluent_version == nil then
-        fluent_version = fluentinfo.guess_fluent_version()
+        fluent_version = guess_fluent_version()
     end
     target:data_set("fluent_version", fluent_version)
     target:data_set("fluent_arch", get_fluent_arch())

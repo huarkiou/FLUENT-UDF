@@ -11,7 +11,7 @@ rule("udf.base")
 
         -- 检查fluent实例是否存在并设置相应的变量
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
-        import("fluentinfo").set_fluent_info(target, FLUENT_VERSION)
+        import("load").set_fluent_info(target, FLUENT_VERSION)
 
         local PARALLEL_NODE = get_config("PARALLEL_NODE")
         if PARALLEL_NODE == nil then
@@ -32,7 +32,7 @@ rule("udf.base")
 
 
         -- 生成udf_names.c和ud_io1.h
-        import("genudfinfo")(target)
+        import("preprocess")(target)
     end)
     on_config(function (target)
         -- udf是动态链接库
@@ -52,7 +52,7 @@ rule("udf.host")
     add_deps("udf.base", {order = true})
     on_config(function (target)
         target:data_set("solver_type", target:data("fluent_dim").."_host")
-        import("fluentinfo").add_fluent_headers_and_links(target)
+        import("load").add_fluent_headers_and_links(target)
     end)
 rule_end()
 
@@ -60,7 +60,7 @@ rule("udf.node")
     add_deps("udf.base", {order = true})
     on_config(function (target)
         target:data_set("solver_type", target:data("fluent_dim").."_node")
-        import("fluentinfo").add_fluent_headers_and_links(target)
+        import("load").add_fluent_headers_and_links(target)
     end)
 rule_end()
 
@@ -68,6 +68,6 @@ rule("udf.seq")
     add_deps("udf.base", {order = true})
     on_config(function (target)
         target:data_set("solver_type", target:data("fluent_dim"))
-        import("fluentinfo").add_fluent_headers_and_links(target)
+        import("load").add_fluent_headers_and_links(target)
     end)
 rule_end()
