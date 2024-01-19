@@ -24,13 +24,13 @@
 4. 下载本仓库内容
     ```sh
     git clone https://github.com/huarkiou/FLUENT-UDF.git
+    cd FLUENT-UDF # 进入新下载的目录
     ```
 
 5. 根据需要修改目录FLUENT-UDF/src下的udf代码和FLUENT-UDF/xmake.lua中的内容
 
 6. 编译UDF生成libudf
     ```sh
-    cd FLUENT-UDF # 进入新下载的目录
     xmake build libudf # 编译生成UDF动态链接库
     ```
 7. 将编译好的libudf安装到目标路径
