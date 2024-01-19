@@ -117,7 +117,6 @@ function main(target)
 
     target:add("files", path.join(autogendir, "udf_names.c"))
     target:add("includedirs", autogendir)
-    target:add("defines", "UDF_EXPORTING", "UDF_NT")
 
     return
 end

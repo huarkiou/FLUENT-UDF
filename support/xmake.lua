@@ -30,9 +30,11 @@ rule("udf.base")
         end
         target:data_set("gpu_support", GPU_SUPPORT)
 
-
         -- 生成udf_names.c和ud_io1.h
         import("preprocess")(target)
+
+        -- 添加宏定义
+        target:add("defines", "UDF_EXPORTING", "UDF_NT", string.upper(target:data("fluent_arch")))
     end)
     on_config(function (target)
         -- udf是动态链接库
