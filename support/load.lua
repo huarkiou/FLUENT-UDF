@@ -1,14 +1,22 @@
 function get_fluent_arch()
-    local arch = os.getenvs()["PROCESSOR_ARCHITECTURE"]
-    if arch == "AMD64" then
-        fluent_arch = "win64"
-    elseif arch == "ALPHA" then
-        fluent_arch = "ntalpha"
-    elseif arch == "x86" then
-        fluent_arch = "ntx86"
-    else
-        raise("Error arch: "..arch)
+    if os.is_host("windows") then
+        if os.is_arch("x64") then
+            fluent_arch = "win64"
+        elseif os.is_arch("alpha") then
+            fluent_arch = "ntalpha"
+        elseif os.is_arch("x86") then
+            fluent_arch = "ntx86"
+        else
+            raise("Error arch: "..os.host()..os.arch())
+        end
+    elseif os.is_host("linux") then
+        if os.is_arch("x86_64") then
+            fluent_arch = "lnamd64"
+        else
+            raise("Error arch: "..os.host()..os.arch())
+        end
     end
+
     return fluent_arch
 end
 
