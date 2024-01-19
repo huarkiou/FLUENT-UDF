@@ -46,7 +46,9 @@
 
 ## 推荐编辑环境
 
-vscode + clangd插件 + CodeLLDB插件 + XMake插件
+vscode + clangd插件 + XMake插件 + CodeLLDB插件(*用不太到，还是用VS调试UDF更方便*)
+
+调试可以用命令```xmake project -k cmake```生成CMakeLists.txt或者```xmake project -k vsxmake```生成vs的sln项目，然后用VS附加到进程调试更方便。
 
 ## 基本示例
 
