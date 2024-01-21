@@ -7,7 +7,7 @@ extern "C"
 #include "dpm.h"
 }
 /* clang-format on */
-
+#include "utilities.hpp"
 constexpr int BOUNDARY_ID = 1;
 
 /* clang-format off */
@@ -16,7 +16,7 @@ int a =3; double b =2;DEFINE_EXECUTE_ON_LOADING(on_loading, libname) {Message(" 
 
 DEFINE_ON_DEMAND(on_demand) {
 #if RP_HOST
-    Message(" \n");
+    hku::println("no cell or face");
 #endif
 
 #if !RP_HOST
@@ -26,16 +26,15 @@ DEFINE_ON_DEMAND(on_demand) {
 
     Thread *ct;
     thread_loop_c(ct, domain) {
-        Message("%d: cell %s\n", myid, ct->name);
+        hku::println("cell name is {}", ct->name);
     }
     Thread *ft;
     thread_loop_f(ft, domain) {
-        Message("%d: face %s\n", myid, ft->name);
+        hku::println("face name is {}", ft->name);
     }
 
     Thread *ft1 = Lookup_Thread(domain, BOUNDARY_ID);
     face_t f;
-    Message("%d: %s\n", myid, ft1->name);
     begin_f_loop(f, ft1) {}
     end_f_loop(f, tf1);
     cell_t c;
