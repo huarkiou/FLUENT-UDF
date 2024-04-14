@@ -15,21 +15,20 @@ target("utility")
     add_includedirs("utility", {public=true})
 target_end()
 
-target("libudf_node")
-    add_rules("udf.node")
-    add_files("src/*.cpp")
-    add_includedirs("src")
-    add_deps("utility")
-target_end()
+typelist = {"node", "host"}
 
-target("libudf_host")
-    add_rules("udf.host")
-    add_files("src/*.cpp")
-    add_includedirs("src")
-    add_deps("utility")
-target_end()
+for i, type in ipairs(typelist) do
+    target("libudf_"..type)
+        add_rules("udf."..type)
+        add_files("src/*.cpp")
+        add_includedirs("src")
+        add_deps("utility")
+    target_end()
+end
 
 target("libudf")
     set_kind("phony")
-    add_deps("libudf_host", "libudf_node")
+    for i, type in ipairs(typelist) do
+        add_deps("libudf_"..type)
+    end
 target()
