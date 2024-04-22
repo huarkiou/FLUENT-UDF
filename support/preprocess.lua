@@ -38,7 +38,7 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
         if path.filename(sourcefile):startswith("udf_names.c") then
             goto continue
         end
-        local command = sed_cmd..sedpattern1..' '..path.join("$(projectdir)", sourcefile)
+        local command = sed_cmd..sedpattern1..' "'..path.join("$(projectdir)", sourcefile)..'"'
         io.printf(premake_cmd_path, command.." > "..tmp_file)
         os.run(premake_cmd_path)
         local outdata = io.readfile(tmp_file)
@@ -53,7 +53,7 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
         if path.filename(sourcefile):startswith("udf_names.c") then
             goto continue
         end
-        local command = sed_cmd..sedpattern2..' '..path.join("$(projectdir)", sourcefile)
+        local command = sed_cmd..sedpattern2..' "'..path.join("$(projectdir)", sourcefile)..'"'
         io.printf(premake_cmd_path, command.." > "..tmp_file)
         os.run(path.join(premake_cmd_path))
         local outdata = io.readfile(tmp_file)
