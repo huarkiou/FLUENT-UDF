@@ -10,6 +10,7 @@ extern "C" {
 
 #include <format>
 #include <numbers>
+#include <vector>
 
 namespace hku {
 
@@ -35,8 +36,24 @@ constexpr double deg2rad(double deg) {
     return deg * std::numbers::pi / 180.;
 }
 
+constexpr std::vector<real> deg2rad(const std::vector<real>& degs) {
+    std::vector<real> ret = degs;
+    for (auto& deg : ret) {
+        deg = deg2rad(deg);
+    }
+    return ret;
+}
+
 constexpr double rad2deg(double rad) {
     return rad * 180. / std::numbers::pi;
+}
+
+constexpr std::vector<real> rad2deg(const std::vector<real>& rads) {
+    std::vector<real> ret = rads;
+    for (auto& rad : ret) {
+        rad = rad2deg(rad);
+    }
+    return ret;
 }
 
 }  // namespace hku
