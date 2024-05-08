@@ -13,6 +13,7 @@ includes("support") -- 将其中文件增加到xmake程序目录下rules文件�
 target("utility")
     set_kind("headeronly")
     add_includedirs("utility", {public=true})
+    set_encodings("utf-8")
 target_end()
 
 typelist = {"node", "host"}
@@ -23,6 +24,7 @@ for i, type in ipairs(typelist) do
         add_files("src/*.cpp")
         add_includedirs("src")
         add_deps("utility")
+        set_encodings("utf-8")
     target_end()
 end
 
