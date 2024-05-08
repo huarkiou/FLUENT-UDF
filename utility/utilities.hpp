@@ -15,20 +15,20 @@ namespace hku {
 
 template <class... Args>
 void print(const std::format_string<Args...> fmt, Args&&... args) {
-    if (myid == 999999) {
-        Message("Host%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-    } else {
-        Message("Node%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-    }
+#if RP_HOST
+    Message("Host%-6d: %s", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Message("Node%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
 
 template <class... Args>
 void println(const std::format_string<Args...> fmt, Args&&... args) {
-    if (myid == 999999) {
-        Message("Host%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-    } else {
-        Message("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-    }
+#if RP_HOST
+    Message("Host%-6d: %s\n", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Message("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
 
 constexpr double deg2rad(double deg) {
