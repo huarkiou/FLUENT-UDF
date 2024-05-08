@@ -9,6 +9,7 @@ extern "C" {
 }
 
 #include <format>
+#include <numbers>
 
 namespace hku {
 
@@ -28,6 +29,14 @@ void println(const std::format_string<Args...> fmt, Args&&... args) {
     } else {
         Message("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
     }
+}
+
+constexpr double deg2rad(double deg) {
+    return deg * std::numbers::pi / 180.;
+}
+
+constexpr double rad2deg(double rad) {
+    return rad * 180. / std::numbers::pi;
 }
 
 }  // namespace hku
