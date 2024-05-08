@@ -14,6 +14,8 @@ target("utility")
     set_kind("headeronly")
     add_includedirs("utility", {public=true})
     set_encodings("utf-8")
+    on_install(function ()
+    end)
 target_end()
 
 typelist = {"node", "host"}
