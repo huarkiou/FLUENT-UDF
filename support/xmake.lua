@@ -13,7 +13,6 @@ rule("udf.base")
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
         import("load").set_fluent_info(target, FLUENT_VERSION)
         if target:data("fluent_path") == nil then
-            target:set("enabled", false)
             return
         end
 
@@ -43,10 +42,15 @@ rule("udf.base")
     on_config(function (target)
         -- udf是动态链接库
         target:set("kind", "shared")
+
+        if target:data("fluent_path") == nil then
+            target:set("enabled", false)
+            cprint([[${bright yellow}warning: ${clear}ANSYS FLUENT not found! Related targets disabled automatically.]])
+        end
     end)
     before_build(function (target)
         if target:data("fluent_path") == nil then
-            raise("ANSYS FLUENT instance not found!")
+            raise("ANSYS FLUENT not found!")
         else
             print("Build for fluent instance ".. target:data("fluent_path"))
         end

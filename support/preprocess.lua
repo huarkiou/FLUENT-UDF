@@ -10,7 +10,6 @@ function _filter_sourcefiles(target)
             end
         end
     end
-    -- print("")
     return sourcefiles
 end
 
