@@ -26,7 +26,8 @@ function find_fluent_dir(target, ansys_version)
     local fluent_path = path.join(envs["AWP_ROOT"..version_table[1]..version_table[2]], "fluent")
 
     if not os.exists(fluent_path) then
-        raise("Cannot find FLUENT instance: ANSYS version is set as "..ansys_version.." now. Please check your configurations!")
+        cprint("${yellow}Cannot find FLUENT instance: ANSYS version is set as "..ansys_version.." now. Please check your configurations!")
+        fluent_path = nil
     else
         -- cprint("${bright green}Find FLUENT instance in ${white}"..fluent_path)
     end
@@ -61,8 +62,8 @@ function guess_fluent_version(target)
         end
     end
     ::FLUENT_HAVE_FOUND::
-    if fluent_version==nil then
-        raise("Ansys Fluent is not found! Please check your envirenment variables.")
+    if fluent_version == nil then
+        cprint([[${yellow}Ansys Fluent is not found! Please check envirenment variables.]])
     else
         -- cprint([[${yellow}FLUENT_VERSION is not set explicitly. ]].."Fluent"..fluent_version..[[ is used.]])
         -- cprint([[${yellow}To set this explicitly, please add "set_config("FLUENT_VERSION", "21.2.0")" to the root xmake.lua]])

@@ -12,6 +12,10 @@ rule("udf.base")
         -- 检查fluent实例是否存在并设置相应的变量
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
         import("load").set_fluent_info(target, FLUENT_VERSION)
+        if target:data("fluent_path") == nil then
+            target:set("default", false)
+            return
+        end
 
         local PARALLEL_NODE = get_config("PARALLEL_NODE")
         if PARALLEL_NODE == nil then
@@ -41,7 +45,11 @@ rule("udf.base")
         target:set("kind", "shared")
     end)
     before_build(function (target)
-        print("Build for fluent instance ".. target:data("fluent_path"))
+        if target:data("fluent_path") == nil then
+            raise("ANSYS FLUENT instance not found!")
+        else
+            print("Build for fluent instance ".. target:data("fluent_path"))
+        end
     end)
     on_install(function (target)
         if target:installdir() == nil then
