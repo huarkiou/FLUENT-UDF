@@ -13,7 +13,7 @@ rule("udf.base")
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
         import("load").set_fluent_info(target, FLUENT_VERSION)
         if target:data("fluent_path") == nil then
-            target:set("default", false)
+            target:set("enabled", false)
             return
         end
 
