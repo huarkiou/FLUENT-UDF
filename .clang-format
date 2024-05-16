@@ -1,14 +1,11 @@
-# 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language: Cpp
-# 基础样式
 BasedOnStyle: Google
 # 每行字符的限制，0表示没有限制
 ColumnLimit: 120
-#
-UseTab: Never
 # 缩进宽度
 IndentWidth: 4
-# 只允许空块不换行
-AllowShortBlocksOnASingleLine: Empty
-# 只合并类中定义的函数和空函数体
-AllowShortFunctionsOnASingleLine: Inline
+UseTab: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty

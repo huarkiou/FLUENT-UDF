@@ -16,21 +16,22 @@ int a =3; double b =2;DEFINE_EXECUTE_ON_LOADING(on_loading, libname) {Message(" 
 
 DEFINE_ON_DEMAND(on_demand) {
 #if RP_HOST
-    hku::println("no cell or face");
+    udf::println("no cell or face");
 #endif
 
 #if !RP_HOST
 
-    if (!Data_Valid_P()) return;
+    if (!Data_Valid_P())
+        return;
     Domain *domain = Get_Domain(1);
 
     Thread *ct;
     thread_loop_c(ct, domain) {
-        hku::println("cell name is {}", ct->name);
+        udf::println("cell name is {}", ct->name);
     }
     Thread *ft;
     thread_loop_f(ft, domain) {
-        hku::println("face name is {}", ft->name);
+        udf::println("face name is {}", ft->name);
     }
 
     Thread *ft1 = Lookup_Thread(domain, BOUNDARY_ID);
@@ -56,7 +57,8 @@ DEFINE_CG_MOTION(cg_motion, dt, velocity, omega, time, dtime) {
 }
 
 DEFINE_EXECUTE_AT_END(exec_at_end) {
-    if (!Data_Valid_P()) return;
+    if (!Data_Valid_P())
+        return;
     Domain *domain = Get_Domain(1);                    // fluid domain pointer
     Thread *tf1 = Lookup_Thread(domain, BOUNDARY_ID);  // boundary pointer
     // calculate the force applied
