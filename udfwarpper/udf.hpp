@@ -1,3 +1,4 @@
+#include <cassert>
 extern "C" {
 #include "udf.h"
 }
@@ -28,10 +29,43 @@ void println(const std::format_string<Args...> fmt, Args&&... args) {
 #endif
 }
 
+template <class... Args>
+void eprint(const std::format_string<Args...> fmt, Args&&... args) {
+#if RP_HOST
+    Error("Host%-6d: %s", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Error("Node%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
+}
+
+template <class... Args>
+void eprintln(const std::format_string<Args...> fmt, Args&&... args) {
+#if RP_HOST
+    Error("Host%-6d: %s\n", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Error("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
+}
+
 template <typename T>
-void host_to_node_vector(std::vector<T>& data) {
+void host_to_node_data(T&) = delete;
+
+template <>
+inline void host_to_node_data<std::string>(std::string& str) {
+    int64_t size = str.size();
+    host_to_node_int64_1(size);
+#if RP_HOST
+    assert(size > 0);
+#endif
+    str.resize(size);
+    host_to_node_string(str.data(), size);
+}
+
+template <typename T>
+inline void host_to_node_data(std::vector<T>& data) {
     int64_t size = data.size();
     host_to_node_int64_1(size);
+    assert(size > 0);
     data.resize(size);
     if constexpr (std::is_same_v<T, int>) {
         host_to_node_int(data.data(), size);
@@ -48,9 +82,24 @@ void host_to_node_vector(std::vector<T>& data) {
 }
 
 template <typename T>
-void node_to_host_vector(std::vector<T>& data) {
+void node_to_host_data(T&) = delete;
+
+template <>
+inline void node_to_host_data<std::string>(std::string& str) {
+    int64_t size = str.size();
+    node_to_host_int64_1(size);
+#if RP_HOST
+    assert(size > 0);
+#endif
+    str.resize(size);
+    node_to_host_string(str.data(), size);
+}
+
+template <typename T>
+inline void node_to_host_data(std::vector<T>& data) {
     int64_t size = data.size();
     node_to_host_int64_1(size);
+    assert(size > 0);
     data.resize(size);
     if constexpr (std::is_same_v<T, int>) {
         node_to_host_int(data.data(), size);
