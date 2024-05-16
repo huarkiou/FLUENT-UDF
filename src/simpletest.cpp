@@ -1,13 +1,8 @@
-﻿/* clang-format off */
-#include <string>
-extern "C"
-{
-#include "udf.h"
-#include "hdfio.h"
-#include "dpm.h"
-}
-/* clang-format on */
-#include "utilities.hpp"
+﻿#include <string>
+
+#include "udf.hpp"
+#include "utility.hpp"
+
 constexpr int BOUNDARY_ID = 1;
 
 /* clang-format off */

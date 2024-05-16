@@ -10,9 +10,9 @@ set_languages("cxx20")
 
 includes("support") -- 将其中文件增加到xmake程序目录下rules文件夹中可不需要这行
 
-target("utility")
+target("udfwarpper")
     set_kind("headeronly")
-    add_includedirs("utility", {public=true})
+    add_includedirs("udfwarpper", {public=true})
     set_encodings("utf-8")
     on_install(function ()
     end)
@@ -25,7 +25,7 @@ for i, type in ipairs(typelist) do
         add_rules("udf."..type)
         add_files("src/*.cpp")
         add_includedirs("src")
-        add_deps("utility")
+        add_deps("udfwarpper")
         set_encodings("utf-8")
     target_end()
 end
