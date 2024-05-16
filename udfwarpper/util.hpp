@@ -8,7 +8,7 @@
 #include <numbers>
 #include <ranges>
 
-namespace utility {
+namespace util {
 
 constexpr double deg2rad(double deg) {
     return deg * std::numbers::pi / 180.;
