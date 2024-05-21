@@ -13,38 +13,22 @@ namespace udf {
 
 template <class... Args>
 void print(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Message("Host%-6d: %s", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Message("Node%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+    Message("%s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
 void println(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Message("Host%-6d: %s\n", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Message("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+    Message("%s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
-void eprint(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Error("Host%-6d: %s", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Error("Node%-6d: %s", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+void info(const std::format_string<Args...> fmt, Args&&... args) {
+    Message("id%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
-void eprintln(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Error("Host%-6d: %s\n", NODE_HOST, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Error("Node%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+void error(const std::format_string<Args...> fmt, Args&&... args) {
+    Error("id%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <typename T>
