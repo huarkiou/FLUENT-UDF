@@ -2,8 +2,8 @@
   这个文件必须要c++20标准才能编译
  */
 
-#ifndef _HUARKIOU_UDF_UTILITIES_HPP
-#define _HUARKIOU_UDF_UTILITIES_HPP
+#ifndef _UDFWARPPER_UTIL_HPP
+#define _UDFWARPPER_UTIL_HPP
 
 #include <numbers>
 #include <ranges>
@@ -56,6 +56,6 @@ inline std::string& string_trim(std::string& text) {
     return text;
 }
 
-}  // namespace utility
+}  // namespace util
 
 #endif

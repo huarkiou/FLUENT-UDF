@@ -1,3 +1,6 @@
+#ifndef _UDFWARPPER_UDF_HPP
+#define _UDFWARPPER_UDF_HPP
+
 #include <cassert>
 extern "C" {
 #include "udf.h"
@@ -100,3 +103,5 @@ inline void node_to_host_data(std::vector<T>& data) {
 }
 
 }  // namespace udf
+
+#endif
