@@ -16,22 +16,22 @@ namespace udf {
 
 template <class... Args>
 void print(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("%s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+    Message("%s", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
 void println(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("%s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+    Message("%s\n", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
 void info(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("id%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+    Message("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
 void error(const std::format_string<Args...> fmt, Args&&... args) {
-    Error("id%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+    Error("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <typename T>
