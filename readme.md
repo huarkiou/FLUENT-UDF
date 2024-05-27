@@ -11,9 +11,17 @@
     4. 调用第三方库麻烦；
     5. 最开始配置UDF的编译环境有很多小坑，虽然很好解决，但是令人不爽。
 
+## 说明
+
+本脚本通过```AWP_ROOT<ver>```环境变量寻找FLUENT的安装位置，需要提前设置环境变量。
+
+（例如，环境变量```AWP_ROOT241```中指定ANSYS2024R1的安装目录```"C:\Program Files\ANSYS2024R1\v241"```）
+
+一般Windows上正常安装完成后ANSYS的安装程序已经自动生成了一系列的环境变量，不需要用户手动设置了。
+
 ## 安装步骤
 
-### Windows 10/11
+### Windows
 
 1. 安装C/C++环境 (**已安装则跳过**) (*推荐Visual Studio Community 2022，安装时工作负载勾选"使用C++的桌面开发"*)
 
@@ -42,13 +50,13 @@
 
 ### Linux
 
-- 暂不直接支持。(不过linux直接改makefile也还挺方便，直接到安装的Ansys目录里面找到"{ANSYS INSTALL DIR}/v241/fluent/fluent24.1.0/src/udf"，把里面的东西拷贝出来用按需求改一改然后直接用make生成也凑合)。
+- 暂不直接支持。(没有测试环境)。
 
-## 推荐编辑环境
+## 推荐环境
 
-vscode + clangd插件 + XMake插件 + CodeLLDB插件(*用不太到，还是用VS调试UDF更方便*)
+vscode + clangd + xmake
 
-调试可以用命令```xmake project -k cmake```生成CMakeLists.txt或者```xmake project -k vsxmake```生成vs的sln项目，然后用VS附加到进程调试更方便。
+Windows下调试可以用命令```xmake project -k cmake```生成CMakeLists.txt或者```xmake project -k vsxmake```生成vs的sln项目，然后用VS附加到进程调试更方便。
 
 ## 基本示例
 
