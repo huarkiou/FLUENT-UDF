@@ -107,9 +107,9 @@ function main(target)
                     local sourcefiles = _filter_sourcefiles(target)
                     local tools_path
                     if os.is_host("windows") then
-                        tools_path = path.join(fluent_path, "/ntbin/win64")
+                        tools_path = path.join(fluent_path, "ntbin/win64")
                     else
-                        tools_path = path.join(fluent_path, "/bin")
+                        tools_path = path.join(fluent_path, "bin")
                     end
                     _generate_udfnames(sourcefiles, tools_path, autogendir)
                     _generate_udfio(sourcefiles, tools_path, autogendir)
