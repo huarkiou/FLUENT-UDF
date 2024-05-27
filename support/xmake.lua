@@ -1,5 +1,8 @@
 rule("udf.base")
     on_load(function (target)
+        if not is_plat("windows", "linux") then
+            target:set("enabled", false)
+        end
         -- 检查基本参数的设置
         local FLUENT_DIM = get_config("FLUENT_DIM")
         if FLUENT_DIM == nil then
