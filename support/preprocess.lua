@@ -27,7 +27,7 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
 ]==]
 
     local tmp_file = os.tmpfile()
-    local sed_path = path.join(tools_path, "sed.exe")
+    local sed_path = path.join(tools_path, "sed"..(os.is_host("windows") and ".exe" or ""))
     local sed_cmd = '"'..sed_path..'"'..' -n '
     sedpattern1 = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
     sedpattern2 = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
@@ -81,7 +81,7 @@ end
 function _generate_udfio(sourcefiles, tools_path, gen_dir)
     -- cprint("${bright green}Generate ${white}udf_io1.h ")
     local udf_io_str = ""
-    local resolve_cmd = '"'..path.join(tools_path, "resolve.exe")..'"'
+    local resolve_cmd = '"'..path.join(tools_path, "resolve"..(os.is_host("windows") and ".exe" or ""))..'"'
     resolve_cmd = resolve_cmd.." -udf "
     local filelist = ""
     for _, sourcefile in ipairs(sourcefiles) do
@@ -105,7 +105,12 @@ function main(target)
                 if srcmtime >= genmtime then
                     local fluent_path = target:data("fluent_path")
                     local sourcefiles = _filter_sourcefiles(target)
-                    local tools_path = path.join(fluent_path, "/ntbin/win64")
+                    local tools_path
+                    if os.is_host("windows") then
+                        tools_path = path.join(fluent_path, "/ntbin/win64")
+                    else
+                        tools_path = path.join(fluent_path, "/bin")
+                    end
                     _generate_udfnames(sourcefiles, tools_path, autogendir)
                     _generate_udfio(sourcefiles, tools_path, autogendir)
                     break
