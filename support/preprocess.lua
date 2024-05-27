@@ -32,7 +32,7 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
     sedpattern1 = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
     sedpattern2 = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
 
-    local premake_cmd_path = path.join(gen_dir, "_premake.cmd")
+    local premake_cmd_path = path.join(gen_dir, "_premake"..(os.is_host("windows") and ".cmd" or ".sh"))
     for _, sourcefile in ipairs(sourcefiles) do
         if path.filename(sourcefile):startswith("udf_names.c") then
             goto continue
