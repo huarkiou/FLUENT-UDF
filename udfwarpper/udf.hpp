@@ -9,30 +9,57 @@ extern "C" {
 #include "dpm.h"
 #include "hdfio.h"
 }
+
+#include <cassert>
 #include <format>
 #include <vector>
 
 namespace udf {
 
+class Node {
+   private:
+    ::Node* node;
+};
+
+// 3.7. Input/Output Functions
+
 template <class... Args>
 void print(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("%s", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#if RP_HOST
+    Message("Host%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Message("Node%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
 
 template <class... Args>
 void println(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("%s\n", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#if RP_HOST
+    Message("Host%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Message("Node%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
 
 template <class... Args>
-void info(const std::format_string<Args...> fmt, Args&&... args) {
-    Message("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+void eprint(const std::format_string<Args...> fmt, Args&&... args) {
+#if RP_HOST
+    Error("Host%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Error("Node%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
 
 template <class... Args>
-void error(const std::format_string<Args...> fmt, Args&&... args) {
-    Error("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+void eprintln(const std::format_string<Args...> fmt, Args&&... args) {
+#if RP_HOST
+    Error("Host%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#else
+    Error("Node%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
+#endif
 }
+
+// 7.3.2.2. Communicating Between the Host and Node Processes
 
 template <typename T>
 void host_to_node_data(T&) = delete;
