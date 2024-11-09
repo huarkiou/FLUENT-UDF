@@ -7,8 +7,14 @@
 
 #include <numbers>
 #include <ranges>
+#include <string>
 
 namespace util {
+
+static constexpr double pi = 3.1415926535897932384626;
+
+static constexpr double deg2rad_scale_factor = pi / 180.;
+static constexpr double rad2deg_scale_factor = 180. / pi;
 
 constexpr double deg2rad(double deg) {
     return deg * std::numbers::pi / 180.;
