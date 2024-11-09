@@ -1,7 +1,3 @@
-/**
-  这个文件必须要c++20标准才能编译
- */
-
 #ifndef _UDFWARPPER_UTIL_HPP
 #define _UDFWARPPER_UTIL_HPP
 

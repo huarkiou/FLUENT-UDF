@@ -3,11 +3,11 @@
 
 #include <cassert>
 extern "C" {
+// clang-format off
 #include "udf.h"
-}
-extern "C" {
 #include "dpm.h"
 #include "hdfio.h"
+// clang-format on
 }
 
 #include <cassert>
