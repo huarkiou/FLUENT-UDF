@@ -2,63 +2,41 @@
 #define _UDFWARPPER_UDF_HPP
 
 #include <cassert>
+#include <stdexcept>
 extern "C" {
 // clang-format off
 #include "udf.h"
 #include "dpm.h"
 #include "hdfio.h"
+#include "dynamesh_tools.h"
 // clang-format on
 }
-
-#include <cassert>
 #include <format>
+#include <string>
 #include <vector>
 
 namespace udf {
-
-class Node {
-   private:
-    ::Node* node;
-};
-
 // 3.7. Input/Output Functions
 
 template <class... Args>
 void print(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Message("Host%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Message("Node%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+    Message("%s", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
 void println(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Message("Host%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Message("Node%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+    Message("%s\n", std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
-void eprint(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Error("Host%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Error("Node%-6d: %s", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+void info(const std::format_string<Args...> fmt, Args&&... args) {
+    Message("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
 
 template <class... Args>
-void eprintln(const std::format_string<Args...> fmt, Args&&... args) {
-#if RP_HOST
-    Error("Host%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#else
-    Error("Node%-6d: %s\n", ::myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
-#endif
+void error(const std::format_string<Args...> fmt, Args&&... args) {
+    Error("id-%-6d: %s\n", myid, std::vformat(fmt.get(), std::make_format_args(args...)).c_str());
 }
-
 // 7.3.2.2. Communicating Between the Host and Node Processes
 
 template <typename T>
@@ -68,9 +46,6 @@ template <>
 inline void host_to_node_data<std::string>(std::string& str) {
     int64_t size = str.size();
     host_to_node_int64_1(size);
-#if RP_HOST
-    assert(size > 0);
-#endif
     str.resize(size);
     host_to_node_string(str.data(), size);
 }
@@ -90,8 +65,7 @@ inline void host_to_node_data(std::vector<T>& data) {
     } else if constexpr (std::is_same_v<T, bool>) {
         host_to_node_boolean(data.data(), size);
     } else {
-        println("host_to_node_vector: Error T in std::vector<T>");
-        throw std::logic_error("error type");
+        error("host_to_node_vector: Error T in std::vector<T>");
     }
 }
 
@@ -124,8 +98,7 @@ inline void node_to_host_data(std::vector<T>& data) {
     } else if constexpr (std::is_same_v<T, bool>) {
         node_to_host_boolean(data.data(), size);
     } else {
-        println("node_to_host_vector: Error T in std::vector<T>");
-        throw std::logic_error("error type");
+        error("node_to_host_vector: Error T in std::vector<T>");
     }
 }
 
