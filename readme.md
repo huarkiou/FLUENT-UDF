@@ -43,15 +43,15 @@
     ```
 7. 将编译好的libudf安装到目标路径
     ```sh
-    xmake install -o D:/path/to/fluent/solution/workdir libudf # xmake<=2.9.5
-    xmake install -o D:/path/to/fluent/solution/workdir        # xmake>=2.9.6
+    xmake install -o D:/path/to/fluent/casedir libudf # xmake<=2.9.5
+    xmake install -o D:/path/to/fluent/casedir        # xmake>=2.9.6
     ```
 
 8. 在FLUENT中导入libudf
 
 ### Linux
 
-- 暂不直接支持。(没有测试环境)。
+- 暂不直接支持。(没有安装了FLUENT的测试环境)。
 
 ## 推荐环境
 
