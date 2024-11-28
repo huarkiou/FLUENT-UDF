@@ -6,10 +6,10 @@
 
 - 拟解决的问题：FLUENT内置的编译脚本有点坑，例如:
     1. DEFINE_XX宏那一行不能有多余字符，导致我习惯的左大括号放在上一行不换行会导致生成udf_names.c出错；
-    2. 当系统语言是中文时，用FLUENT内的编译udf，如果代码有错误，编译报错的提示在FLUENT的console中会乱码，而且信息多且乱；
-    3. 编译器开启的语言标准采用默认，现在想开c++20标准还得去改他的编译脚本；
-    4. 调用第三方库麻烦；
-    5. 最开始配置UDF的编译环境有很多小坑，虽然很好解决，但是令人不爽。
+    2. 在部分版本的FLUENT上内置编译脚本匹配DEFINE_XX宏时有时会漏掉部分内容；
+    3. 当系统语言是中文时，用FLUENT内的编译udf，如果代码有错误，编译报错的提示在FLUENT的console中会乱码，而且信息多且乱；
+    4. 编译器开启的语言标准采用默认，现在想开c++20标准还得去改他的编译脚本；
+    5. 调用第三方库麻烦。
 
 ## 说明
 
@@ -43,7 +43,8 @@
     ```
 7. 将编译好的libudf安装到目标路径
     ```sh
-    xmake install -o D:/path/to/fluent/solution/workdir libudf
+    xmake install -o D:/path/to/fluent/solution/workdir libudf # xmake<=2.9.5
+    xmake install -o D:/path/to/fluent/solution/workdir        # xmake>=2.9.6
     ```
 
 8. 在FLUENT中导入libudf
