@@ -8,7 +8,7 @@ set_config("PARALLEL_NODE", "smpi")
 
 set_languages("cxx20") -- 指定C++标准
 
-includes("support") -- 将其中文件增加到xmake程序目录下rules文件夹中可不需要这行
+includes("support") -- 若将其中文件增加到xmake程序目录下rules文件夹中可不需要这行
 
 typelist = {"node", "host"}
 
@@ -17,7 +17,7 @@ for i, type in ipairs(typelist) do
         add_rules("udf."..type)
         add_files("src/*.cpp")
         add_includedirs("src")
-        add_deps("udfwarpper")
+        add_deps("udfwarpper") -- 不需要可以去掉
         set_encodings("utf-8")
     target_end()
 end
