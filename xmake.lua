@@ -1,3 +1,4 @@
+set_xmakever("2.9.7")
 add_rules("mode.release", "mode.debug")
 
 -- set_config("FLUENT_VERSION", "24.1.0")
