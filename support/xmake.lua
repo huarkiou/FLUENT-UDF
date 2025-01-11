@@ -26,7 +26,8 @@ rule("udf.base")
                 none: a serial version of the solver
                 smpi: parallel using shared memory (for multiprocessor machines)
                 vmpi: parallel using shared memory or network with vendor MPI software
-                net: parallel using network communicator with RSHD software]])
+                net: parallel using network communicator with RSHD software
+                nmpi: parallel using nmpi ]])
         end
         target:data_set("parallel_node", PARALLEL_NODE)
 
