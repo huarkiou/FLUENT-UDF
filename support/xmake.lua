@@ -59,6 +59,17 @@ rule("udf.base")
             print("Build for fluent instance ".. target:data("fluent_path"))
         end
     end)
+    after_build(function (target)
+        local output_dir = path.join(target:targetdir(), "libudf", target:data("fluent_arch"), target:data("solver_type"))
+        os.cp(path.join(target:targetdir(), target:name()..".dll"), path.join(output_dir, "libudf.dll"))
+        os.trycp(path.join(target:targetdir(), target:name()..".pdb"), path.join(output_dir, "libudf.pdb"))
+        for _, sourcebatch in pairs(target:sourcebatches()) do
+            local sourcekind = sourcebatch.sourcekind
+            for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
+                os.cp(sourcefile, path.join(target:targetdir(), "libudf", "src", sourcefile))
+            end
+        end
+    end)
     on_install(function (target)
         if target:installdir() == nil then
             raise("Target install directory has not set yet! example usage: xmake install -o D:/path/to/install libudf")
