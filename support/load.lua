@@ -1,20 +1,22 @@
 function get_fluent_arch()
     if os.is_host("windows") then
-        if os.is_arch("x64") then
+        if os.is_arch("x64", "x86_64") then
             fluent_arch = "win64"
         elseif os.is_arch("alpha") then
             fluent_arch = "ntalpha"
         elseif os.is_arch("x86") then
             fluent_arch = "ntx86"
         else
-            raise("Error arch: "..os.host()..os.arch())
+            raise("Unsupported Architecture: "..os.host()..os.arch())
         end
     elseif os.is_host("linux") then
         if os.is_arch("x86_64") then
             fluent_arch = "lnamd64"
         else
-            raise("Error arch: "..os.host()..os.arch())
+            raise("Unsupported Architecture: "..os.host()..os.arch())
         end
+    else
+        raise("Unsupported Host OS: "..os.host()..os.arch())
     end
 
     return fluent_arch
@@ -48,7 +50,7 @@ end
 
 function guess_fluent_version(target)
     local fluent_version = nil
-    local majors = {24, 23, 22, 21, 20, 19, 18, 17}
+    local majors = {25, 23, 22, 21, 20, 19, 18, 17}
     local minors = {2, 1}
     local fixs = {0}
     for _, major in ipairs(majors) do
