@@ -15,9 +15,10 @@ typelist = {"node", "host"}
 for i, type in ipairs(typelist) do
     target("libudf_"..type)
         add_rules("udf."..type)
-        add_files("src/*.cpp")
+        add_files("src/*.cpp")  -- C++源文件
+        add_files("src/*.c")    -- C源文件
         add_includedirs("src")
-        add_deps("udfwarpper") -- 不需要可以去掉
+        add_deps("udfwarpper")  -- 不需要可以去掉
         set_encodings("utf-8")
     target_end()
 end
