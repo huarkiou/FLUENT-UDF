@@ -25,7 +25,7 @@
 
 1. 安装C/C++环境 (**已安装则跳过**) (*推荐Visual Studio Community 2022，安装时工作负载勾选"使用C++的桌面开发"*)
 
-2. 安装ANSYS Fluent (**已安装则跳过**) (*测试过2020R1~2024R1，更低的理论上也行但是没试过*)
+2. 安装ANSYS Fluent (**已安装则跳过**) (*测试过2020R1~2024R2，更低的理论上也行但是没试过*)
 
 3. 安装[xmake](https://github.com/xmake-io/xmake/releases/)，确保已将其添加至环境变量
 
@@ -44,7 +44,7 @@
 7. 将编译好的libudf安装到目标路径
     ```sh
     xmake install -o D:/path/to/fluent/casedir libudf # xmake<=2.9.5
-    xmake install -o D:/path/to/fluent/casedir        # xmake>=2.9.6
+    xmake install -a -o D:/path/to/fluent/casedir     # any xmake version
     ```
 
 8. 在FLUENT中导入libudf
