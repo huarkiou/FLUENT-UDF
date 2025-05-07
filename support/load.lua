@@ -50,7 +50,7 @@ end
 
 function guess_fluent_version(target)
     local fluent_version = nil
-    local majors = {25, 23, 22, 21, 20, 19, 18, 17}
+    local majors = {25, 24, 23, 22, 21, 20, 19, 18, 17}
     local minors = {2, 1}
     local fixs = {0}
     for _, major in ipairs(majors) do
