@@ -3,7 +3,8 @@ rule("udf.base")
         if not is_plat("windows", "linux") then
             target:set("enabled", false)
         end
-        -- 检查基本参数的设置
+
+        -- 检查Fluent维度
         local FLUENT_DIM = get_config("FLUENT_DIM")
         if FLUENT_DIM == nil then
             raise([[Please add a line like "set_config("FLUENT_DIM", "2ddp")" to root xmake.lua file to decide the solution type!
@@ -12,13 +13,14 @@ rule("udf.base")
             target:data_set("fluent_dim", FLUENT_DIM)
         end
 
-        -- 检查fluent实例是否存在并设置相应的变量
+        -- 检查fluent实例是否存在并设置所需变量
         local FLUENT_VERSION = get_config("FLUENT_VERSION")
         import("load").set_fluent_info(target, FLUENT_VERSION)
         if target:data("fluent_path") == nil then
             return
         end
 
+        -- 并行方式
         local PARALLEL_NODE = get_config("PARALLEL_NODE")
         if PARALLEL_NODE == nil then
             raise([[Please add a line like "set_config("PARALLEL_NODE", "smpi")" to root xmake.lua file to decide the parallel node!
@@ -31,6 +33,7 @@ rule("udf.base")
         end
         target:data_set("parallel_node", PARALLEL_NODE)
 
+        -- 是否开启GPU
         local GPU_SUPPORT = get_config("GPU_SUPPORT")
         if GPU_SUPPORT == nil then
             GPU_SUPPORT = false
@@ -40,7 +43,7 @@ rule("udf.base")
         -- 生成udf_names.c和ud_io1.h
         import("preprocess")(target)
 
-        -- 添加宏定义
+        -- 添加预定义宏
         target:add("defines", "UDF_EXPORTING", "UDF_NT", string.upper(target:data("fluent_arch")))
     end)
     on_config(function (target)
