@@ -56,7 +56,12 @@ rule("udf.base")
         if target:data("fluent_path") == nil then
             raise("ANSYS FLUENT not found!")
         else
-            print("Build for fluent instance ".. target:data("fluent_path"))
+            config = import("core.project.config")
+            cprint("Build target ${bright green}"..target:name()
+                .."${default} for fluent instance ${bright green}"..target:data("fluent_path")
+                .."${default} on ${bright green}"..config.plat().."-"..config.arch()
+                .."${default} in ${bright green}"..config.mode().."${default} mode"
+            )
         end
     end)
     after_build(function (target)
