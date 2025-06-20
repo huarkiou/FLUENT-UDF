@@ -2,6 +2,9 @@ rule("udf.base")
     on_load(function (target)
         if not is_plat("windows", "linux") then
             target:set("enabled", false)
+            if is_plat("linux") then
+                raise("Linux is not supported yet")
+            end
         end
 
         -- 检查Fluent维度
