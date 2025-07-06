@@ -3,6 +3,9 @@ function main(target, base_dir)
             cprint("${red}Wrong output directory: " .. (base_dir or "nil") .. "${default}")
             return
         end
+        if target:rules()["udf.host"] == nil and target:rules()["udf.node"] == nil then
+            return
+        end
         local output_dir = path.join(base_dir, target:data("fluent_arch"), target:data("solver_type"))
         -- 复制生成的二进制目标
         os.cp(path.join(target:targetdir(), target:name()..".dll"), path.join(output_dir, "libudf.dll"))

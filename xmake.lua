@@ -28,6 +28,12 @@ target("libudf")
     for i, type in ipairs(typelist) do
         add_deps("libudf_"..type)
     end
+    on_install(function (target)
+        for key, dep in pairs(target:deps()) do
+            local output_dir = path.join(target:installdir(), "libudf")
+            import("support.install")(dep, output_dir)
+        end
+    end)
 target()
 
 -- 不需要可以去掉

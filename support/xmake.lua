@@ -30,7 +30,7 @@ rule("udf.base")
     end)
     on_install(function (target)
         if target:installdir() == nil then
-            raise("Target install directory has not set yet! Example usage: xmake install -a -o D:/path/to/install")
+            raise("Target install directory has not set yet! Example usage: xmake install -o D:/path/to/install libudf")
         end
         local output_dir = path.join(target:installdir(), "libudf")
         import("install")(target, output_dir)
