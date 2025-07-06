@@ -29,7 +29,7 @@ target("libudf")
         add_deps("libudf_"..type)
     end
     on_install(function (target)
-        for key, dep in pairs(target:deps()) do
+        for _, dep in pairs(target:deps()) do
             local output_dir = path.join(target:installdir(), "libudf")
             import("support.install")(dep, output_dir)
         end
