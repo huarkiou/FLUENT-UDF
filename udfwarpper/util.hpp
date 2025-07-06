@@ -37,10 +37,10 @@ constexpr T rad2deg(const T& rads) {
     return ret;
 }
 
-inline std::string& string_replace(std::string& strBase, std::string strSrc, std::string strDes) {
+inline std::string& string_replace(std::string& strBase, std::string_view strSrc, std::string_view strDes) {
     std::string::size_type pos = 0;
-    std::string::size_type srcLen = strSrc.size();
-    std::string::size_type desLen = strDes.size();
+    decltype(strSrc)::size_type srcLen = strSrc.size();
+    decltype(strDes)::size_type desLen = strDes.size();
     pos = strBase.find(strSrc, pos);
     while ((pos != std::string::npos)) {
         strBase.replace(pos, srcLen, strDes);
