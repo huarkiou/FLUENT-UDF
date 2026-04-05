@@ -14,7 +14,7 @@ function main(target, base_dir)
         for _, sourcebatch in pairs(target:sourcebatches()) do
             local sourcekind = sourcebatch.sourcekind
             for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
-                os.cp(sourcefile, path.join(base_dir, "src", sourcefile))
+                os.cp(sourcefile, path.join(base_dir, "src", path.filename(sourcefile)))
             end
         end
         -- 写入编译信息
