@@ -23,24 +23,12 @@ function get_fluent_arch()
 end
 
 function find_fluent_dir(target, ansys_version)
-    local version_table = (ansys_version):split('.', {plain = true})
-    local envs = os.getenvs() -- 获取环境变量
-    local fluent_path = path.join(envs["AWP_ROOT"..version_table[1]..version_table[2]], "fluent")
-
-    if not os.exists(fluent_path) then
-        -- cprint("${yellow}Cannot find FLUENT instance: ANSYS version is set as "..ansys_version.." now. Please check your configurations!")
-        fluent_path = nil
-    else
-        -- cprint("${bright green}Find FLUENT instance in ${white}"..fluent_path)
-    end
-
-    return fluent_path
+    return _get_fluent_dir_by_version(target, _version_to_awp_root(ansys_version))
 end
 
-function _validate_fluent_dir(target, ansys_version)
-    local version_table = (ansys_version):split('.', {plain = true})
+function _get_fluent_dir_by_version(target, key)
     local envs = os.getenvs() -- 获取环境变量
-    local fluent_path = path.join(envs["AWP_ROOT"..version_table[1]..version_table[2]], "fluent")
+    local fluent_path = path.join(envs[key], "fluent")
 
     if not os.exists(fluent_path) then
         fluent_path = nil
@@ -48,34 +36,71 @@ function _validate_fluent_dir(target, ansys_version)
     return fluent_path
 end
 
-function guess_fluent_version(target)
-    local fluent_version = nil
-    local majors = {25, 24, 23, 22, 21, 20, 19, 18, 17}
-    local minors = {2, 1}
-    local fixs = {0}
-    for _, major in ipairs(majors) do
-        for _, minor in ipairs(minors) do
-            for _, fix in ipairs(fixs) do
-                fluent_version = major..'.'..minor..'.'..fix
-                if nil ~= _validate_fluent_dir(target, fluent_version) then
-                    goto FLUENT_HAVE_FOUND
-                end
+-- 获取最大版本的 AWP_ROOT 环境变量值
+function _get_latest_awp_root()
+    local max_ver = -1
+    local max_key = nil
+    local max_val = nil
+
+    for name, value in pairs(os.getenvs()) do
+        -- 匹配 AWP_ROOT 后紧跟数字的部分
+        local suffix = name:match("^AWP_ROOT(%d+)$")
+        if suffix then
+            local ver = tonumber(suffix)
+            if ver and ver > max_ver then
+                max_ver = ver
+                max_key = name
+                max_val = value
             end
         end
     end
-    ::FLUENT_HAVE_FOUND::
-    if fluent_version == nil then
-        -- cprint([[${yellow}Ansys Fluent is not found! Please check envirenment variables.]])
+
+    if max_key then
+        return max_key, max_val   -- 返回变量名和值，例如 "AWP_ROOT242" 和路径
     else
-        -- cprint([[${yellow}FLUENT_VERSION is not set explicitly. ]].."Fluent"..fluent_version..[[ is used.]])
-        -- cprint([[${yellow}To set this explicitly, please add "set_config("FLUENT_VERSION", "21.2.0")" to the root xmake.lua]])
+        return nil, nil
+    end
+end
+
+-- 将AWP_ROOT242转换为版本号格式，例如 "24.2.0"
+function _awp_root_to_version(value)
+    local version = value:match("AWP_ROOT(%d+)")
+    if version then
+        return version:sub(1, 2) .. "." .. version:sub(3, 4) .. ".0"
+    else
+        return nil
+    end
+end
+
+-- 将版本号转换为AWP_ROOT环境变量名，例如 "24.2.0" 转换为 "AWP_ROOT242"
+function _version_to_awp_root(version)
+    local major, minor = version:match("^(%d+)%.(%d+)%.%d+$")
+    if major and minor then
+        return "AWP_ROOT" .. major .. minor
+    else
+        return nil
+    end
+end
+
+function _guess_fluent_version(target)
+    local fluent_version = nil
+    local key, value = _get_latest_awp_root()
+    if key and value then
+        cprint("Found FLUENT instance from environment variable ${bright green}"..key.."${white} : "..tostring(value))
+        fluent_version = _awp_root_to_version(key)
+    else
+        goto FLUENT_NOT_FOUND
+    end
+    ::FLUENT_NOT_FOUND::
+    if fluent_version == nil then
+        cprint([[${yellow}Ansys Fluent is not found! Please check envirenment variables.]])
     end
     return fluent_version
 end
 
 function set_fluent_info(target, fluent_version)
     if fluent_version == nil then
-        fluent_version = guess_fluent_version()
+        fluent_version = _guess_fluent_version()
     end
     target:data_set("fluent_version", fluent_version)
     target:data_set("fluent_arch", get_fluent_arch())
