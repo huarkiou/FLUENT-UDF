@@ -1,112 +1,14 @@
-function get_fluent_arch()
-    if os.is_host("windows") then
-        if os.is_arch("x64", "x86_64") then
-            fluent_arch = "win64"
-        elseif os.is_arch("alpha") then
-            fluent_arch = "ntalpha"
-        elseif os.is_arch("x86") then
-            fluent_arch = "ntx86"
-        else
-            raise("Unsupported Architecture: "..os.host()..os.arch())
-        end
-    elseif os.is_host("linux") then
-        if os.is_arch("x86_64") then
-            fluent_arch = "lnamd64"
-        else
-            raise("Unsupported Architecture: "..os.host()..os.arch())
-        end
-    else
-        raise("Unsupported Host OS: "..os.host()..os.arch())
-    end
-
-    return fluent_arch
-end
-
-function find_fluent_dir(target, ansys_version)
-    return _get_fluent_dir_by_version(target, _version_to_awp_root(ansys_version))
-end
-
-function _get_fluent_dir_by_version(target, key)
-    local envs = os.getenvs() -- 获取环境变量
-    local fluent_path = path.join(envs[key], "fluent")
-
-    if not os.exists(fluent_path) then
-        fluent_path = nil
-    end
-    return fluent_path
-end
-
--- 获取最大版本的 AWP_ROOT 环境变量值
-function _get_latest_awp_root()
-    local max_ver = -1
-    local max_key = nil
-    local max_val = nil
-
-    for name, value in pairs(os.getenvs()) do
-        -- 匹配 AWP_ROOT 后紧跟数字的部分
-        local suffix = name:match("^AWP_ROOT(%d+)$")
-        if suffix then
-            local ver = tonumber(suffix)
-            if ver and ver > max_ver then
-                max_ver = ver
-                max_key = name
-                max_val = value
-            end
-        end
-    end
-
-    if max_key then
-        return max_key, max_val   -- 返回变量名和值，例如 "AWP_ROOT242" 和路径
-    else
-        return nil, nil
-    end
-end
-
--- 将AWP_ROOT242转换为版本号格式，例如 "24.2.0"
-function _awp_root_to_version(value)
-    local version = value:match("AWP_ROOT(%d+)")
-    if version then
-        return version:sub(1, 2) .. "." .. version:sub(3, 4) .. ".0"
-    else
-        return nil
-    end
-end
-
--- 将版本号转换为AWP_ROOT环境变量名，例如 "24.2.0" 转换为 "AWP_ROOT242"
-function _version_to_awp_root(version)
-    local major, minor = version:match("^(%d+)%.(%d+)%.%d+$")
-    if major and minor then
-        return "AWP_ROOT" .. major .. minor
-    else
-        return nil
-    end
-end
-
-function _guess_fluent_version(target)
-    local fluent_version = nil
-    local key, value = _get_latest_awp_root()
-    if key and value then
-        cprint("Found FLUENT instance from environment variable ${bright green}"..key.."${white} : "..tostring(value))
-        fluent_version = _awp_root_to_version(key)
-    else
-        goto FLUENT_NOT_FOUND
-    end
-    ::FLUENT_NOT_FOUND::
-    if fluent_version == nil then
-        cprint([[${yellow}Ansys Fluent is not found! Please check envirenment variables.]])
-    end
-    return fluent_version
-end
-
+-- 为target设置fluent实例相关信息
 function set_fluent_info(target, fluent_version)
     if fluent_version == nil then
         fluent_version = _guess_fluent_version()
     end
     target:data_set("fluent_version", fluent_version)
-    target:data_set("fluent_arch", get_fluent_arch())
-    target:data_set("fluent_path", find_fluent_dir(target, fluent_version))
+    target:data_set("fluent_arch", _get_fluent_arch())
+    target:data_set("fluent_path", _find_fluent_dir(target, fluent_version))
 end
 
+-- 为target添加fluent相关的头文件和链接库 （需先运行set_fluent_info获取fluent实例相关信息）
 function add_fluent_headers_and_links(target)
     -- cprint("${bright green}Loading FLUENT headers and libraries ...")
 
@@ -193,4 +95,108 @@ function add_fluent_headers_and_links(target)
         target:add("sysincludedirs", result.includedirs)
         target:add("syslinks", result.links)
         target:add("linkdirs", result.linkdirs)
+end
+
+-- 设置fluent架构信息
+function _get_fluent_arch()
+    if os.is_host("windows") then
+        if os.is_arch("x64", "x86_64") then
+            fluent_arch = "win64"
+        elseif os.is_arch("alpha") then
+            fluent_arch = "ntalpha"
+        elseif os.is_arch("x86") then
+            fluent_arch = "ntx86"
+        else
+            raise("Unsupported Architecture: "..os.host()..os.arch())
+        end
+    elseif os.is_host("linux") then
+        if os.is_arch("x86_64") then
+            fluent_arch = "lnamd64"
+        else
+            raise("Unsupported Architecture: "..os.host()..os.arch())
+        end
+    else
+        raise("Unsupported Host OS: "..os.host()..os.arch())
+    end
+
+    return fluent_arch
+end
+
+-- 查找fluent安装目录
+function _find_fluent_dir(target, ansys_version)
+    return _get_fluent_dir_by_version(target, _version_to_awp_root(ansys_version))
+end
+
+-- 根据环境变量获取指定版本的fluent安装目录
+function _get_fluent_dir_by_version(target, key)
+    local envs = os.getenvs() -- 获取环境变量
+    local fluent_path = path.join(envs[key], "fluent")
+
+    if not os.exists(fluent_path) then
+        fluent_path = nil
+    end
+    return fluent_path
+end
+
+-- 获取最大版本的 AWP_ROOT 环境变量值
+function _get_latest_awp_root()
+    local max_ver = -1
+    local max_key = nil
+    local max_val = nil
+
+    for name, value in pairs(os.getenvs()) do
+        -- 匹配 AWP_ROOT 后紧跟数字的部分
+        local suffix = name:match("^AWP_ROOT(%d+)$")
+        if suffix then
+            local ver = tonumber(suffix)
+            if ver and ver > max_ver then
+                max_ver = ver
+                max_key = name
+                max_val = value
+            end
+        end
+    end
+
+    if max_key then
+        return max_key, max_val   -- 返回变量名和值，例如 "AWP_ROOT242" 和路径
+    else
+        return nil, nil
+    end
+end
+
+-- 将AWP_ROOT242转换为版本号格式，例如 "24.2.0"
+function _awp_root_to_version(value)
+    local version = value:match("AWP_ROOT(%d+)")
+    if version then
+        return version:sub(1, 2) .. "." .. version:sub(3, 4) .. ".0"
+    else
+        return nil
+    end
+end
+
+-- 将版本号转换为AWP_ROOT环境变量名，例如 "24.2.0" 转换为 "AWP_ROOT242"
+function _version_to_awp_root(version)
+    local major, minor = version:match("^(%d+)%.(%d+)%.%d+$")
+    if major and minor then
+        return "AWP_ROOT" .. major .. minor
+    else
+        return nil
+    end
+end
+
+-- 从环境变量中选择最高版本的fluent
+function _guess_fluent_version(target)
+    local fluent_version = nil
+    local key, value = _get_latest_awp_root()
+    if key and value then
+        cprint("Found FLUENT instance from environment variable ${bright green}"..key.."${white} : "..tostring(value))
+        fluent_version = _awp_root_to_version(key)
+    else
+        goto FLUENT_NOT_FOUND
+    end
+    ::FLUENT_NOT_FOUND::
+    if fluent_version == nil then
+        cprint([[${yellow}Ansys Fluent is not found! Please check envirenment variables.]])
+    end
+    return fluent_version
 end

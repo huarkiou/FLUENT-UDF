@@ -11,11 +11,13 @@ function main(target)
     _validate_fluent_dim(FLUENT_DIM)
     target:data_set("fluent_dim", FLUENT_DIM)
 
-    -- 检查fluent实例是否存在并设置所需变量
+    -- 检查fluent实例是否存在
     local FLUENT_VERSION = get_config("FLUENT_VERSION")
     if not FLUENT_VERSION then
-        print([[Warning:FLUENT_VERSION is not set. Better add "set_config("FLUENT_VERSION", "24.2.0")" to the root xmake.lua.]].."\n"..[[Guessing fluent path by checking environment variables...]])
+        cprint([[${yellow}Warning:${white}FLUENT_VERSION is not set. Better add "set_config("FLUENT_VERSION", "24.2.0")" to the root xmake.lua.]].."\n"..[[Guessing fluent path by checking environment variables...]])
     end
+
+    -- 加载信息fluent实例相关信息
     import("load").set_fluent_info(target, FLUENT_VERSION)
     if target:data("fluent_path") == nil then
         return
