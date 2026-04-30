@@ -10,12 +10,17 @@ function main(target)
         end
     end
 
-    local gen_mtime = os.mtime(path.join(autogendir, "udf_names.c")) or 0
+    local udf_names_path = path.join(autogendir, "udf_names.c")
+    local gen_mtime
+    if os.isfile(udf_names_path) then
+        gen_mtime = os.mtime(udf_names_path) or 0
+    else
+        gen_mtime = -1   -- 强制生成
+    end
     if max_src_mtime > gen_mtime then
         local fluent_path = target:data("fluent_path")
         local tools_path = os.is_host("windows") and path.join(fluent_path, "ntbin/win64") or path.join(fluent_path, "bin")
-        local udf_names_path = _generate_udfnames(sourcefiles, tools_path, autogendir)
-        sourcefiles = table.insert(sourcefiles, udf_names_path)
+        _generate_udfnames(sourcefiles, tools_path, autogendir)
         _generate_udfio(sourcefiles, tools_path, autogendir)
     end
 
@@ -101,7 +106,6 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
     local udf_names_str = table.concat(parts)
     local udf_names_path = path.join(gen_dir, "udf_names.c")
     io.writefile(udf_names_path, udf_names_str)
-    return udf_names_path
 end
 
 -- 生成ud_io1.h文件
