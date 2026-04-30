@@ -61,7 +61,7 @@ end
 
 -- 生成udf_names.c文件，包含所有UDF函数的声明和一个UDF_Data数组 需确保去除重复的源文件
 function _generate_udfnames(sourcefiles, tools_path, gen_dir)
-    local sed_path = path.join(tools_path, "sed".._exe_suffix())
+    local sed_path = path.join(tools_path, "sed" .. _exe_suffix())
     local pattern_decl = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
     local pattern_data = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
 
