@@ -1,6 +1,6 @@
 function main(target)
-    -- 检查平台
-    local is_supported, error_msg = check_platform()
+    -- 检查平台是否受支持
+    local is_supported, error_msg = _check_platform()
     target:set("enabled", is_supported)
     if not is_supported then
         raise(error_msg)
@@ -8,7 +8,7 @@ function main(target)
 
     -- 检查Fluent维度
     local FLUENT_DIM = get_config("FLUENT_DIM")
-    validate_fluent_dim(FLUENT_DIM)
+    _validate_fluent_dim(FLUENT_DIM)
     target:data_set("fluent_dim", FLUENT_DIM)
 
     -- 检查fluent实例是否存在并设置所需变量
@@ -23,16 +23,16 @@ function main(target)
 
     -- 并行方式
     local PARALLEL_NODE = get_config("PARALLEL_NODE")
-    validate_fluent_parallel_node(PARALLEL_NODE)
+    _validate_fluent_parallel_node(PARALLEL_NODE)
     target:data_set("parallel_node", PARALLEL_NODE)
 
     -- 是否开启GPU
     local GPU_SUPPORT = get_config("GPU_SUPPORT")
-    validate_gpu_support(GPU_SUPPORT)
+    _validate_gpu_support(GPU_SUPPORT)
     target:data_set("gpu_support", GPU_SUPPORT)
 end
 
-function check_platform()
+function _check_platform()
     if is_plat("windows") then
         return true
     elseif is_plat("linux") then
@@ -42,7 +42,7 @@ function check_platform()
     end
 end
 
-function validate_fluent_dim(value)
+function _validate_fluent_dim(value)
     local valid_dims = { ["2d"]=true, ["3d"]=true, ["2ddp"]=true, ["3ddp"]=true }
     if not valid_dims[value] then
         raise([[Please add a line like "set_config("FLUENT_DIM", "2ddp")" to root xmake.lua file to decide the solution type!
@@ -50,7 +50,7 @@ function validate_fluent_dim(value)
     end
 end
 
-function validate_fluent_parallel_node(value)
+function _validate_fluent_parallel_node(value)
     local valid_pn = { ["none"]=true, ["smpi"]=true, ["vmpi"]=true, ["net"]=true, ["nmpi"]=true }
     if not valid_pn[value] then
         raise([[Please add a line like "set_config("PARALLEL_NODE", "smpi")" to root xmake.lua file to decide the parallel node!
@@ -63,7 +63,7 @@ function validate_fluent_parallel_node(value)
     end
 end
 
-function validate_gpu_support(value)
+function _validate_gpu_support(value)
     if type(value) ~= "boolean" then
         raise([[Please add a line like "set_config("GPU_SUPPORT", false)" to root xmake.lua file to decide whether to enable GPU support!]])
     end
