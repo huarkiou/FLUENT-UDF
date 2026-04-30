@@ -14,7 +14,7 @@ function main(target)
     -- 检查fluent实例是否存在
     local FLUENT_VERSION = get_config("FLUENT_VERSION")
     if not FLUENT_VERSION then
-        cprint([[${yellow}Warning:${white}FLUENT_VERSION is not set. Better add "set_config("FLUENT_VERSION", "24.2.0")" to the root xmake.lua.]].."\n"..[[Guessing fluent path by checking environment variables...]])
+        cprint([[${yellow}Warning:${default}FLUENT_VERSION is not set. Better add "set_config("FLUENT_VERSION", "24.2.0")" to the root xmake.lua.]].."\n"..[[Guessing fluent path by checking environment variables...]])
     end
 
     -- 加载信息fluent实例相关信息

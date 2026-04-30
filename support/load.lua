@@ -189,7 +189,7 @@ function _guess_fluent_version(target)
     local fluent_version = nil
     local key, value = _get_latest_awp_root()
     if key and value then
-        cprint("Found FLUENT instance from environment variable ${bright green}"..key.."${white} : "..tostring(value))
+        cprint("Found FLUENT instance from environment variable ${bright green}"..key.."${default} : "..tostring(value))
         fluent_version = _awp_root_to_version(key)
     else
         goto FLUENT_NOT_FOUND
