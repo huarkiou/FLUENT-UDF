@@ -1,9 +1,17 @@
+-- 根据当前平台生成可执行文件的后缀
+local function _exe_suffix()
+    return os.is_host("windows") and ".exe" or ""
+end
+
 -- 获取源文件列表并去重
 function _filter_sourcefiles(target)
+    local seen = {}
     local sourcefiles = {}
     for _, sourcebatch in pairs(target:sourcebatches()) do
         for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
-            if not path.filename(sourcefile):startswith("udf_names.c") and not table.contains(sourcefiles, sourcefile) then
+            local name = path.filename(sourcefile)
+            if name ~= "udf_names.c" and not seen[sourcefile] then
+                seen[sourcefile] = true
                 table.insert(sourcefiles, sourcefile)
             end
         end
@@ -11,110 +19,102 @@ function _filter_sourcefiles(target)
     return sourcefiles
 end
 
-function _generate_udfnames(sourcefiles, tools_path, gen_dir)
-    -- cprintf("${bright green}Generate ${white}udf_names.c ")
+-- 使用sed命令提取UDF函数的声明和数据
+function _run_sed(sed_path, pattern, sourcefile)
+    local cmd = string.format('%q -n %s %q', sed_path, pattern, sourcefile)
+    local out, err = os.iorun(cmd)
+    if out==nil then
+        raise("sed failed on %s: %s",sourcefile, err or "unknown error")
+    end
+    return out
+end
 
-    local udf_names_str = [==[
+-- 生成udf_names.c文件，包含所有UDF函数的声明和一个UDF_Data数组
+function _generate_udfnames(sourcefiles, tools_path, gen_dir)
+    local sed_path = path.join(tools_path, "sed".._exe_suffix())
+    local pattern_decl = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
+    local pattern_data = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
+
+    local parts = {[==[
 /* This file generated automatically. */
 /*          Do not modify.            */
-
 #include "udf.h"
 #include "prop.h"
 #include "dpm.h"
 
-]==]
+#ifdef _WIN32
+#define EXPORT __declspec(dllexport)
+#else
+#define EXPORT __attribute__((visibility("default")))
+#endif
 
-    local tmp_file = os.tmpfile()
-    local sed_path = path.join(tools_path, "sed"..(os.is_host("windows") and ".exe" or ""))
-    local sed_cmd = '"'..sed_path..'"'..' -n '
-    local sedpattern1 = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
-    local sedpattern2 = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
-
-    local premake_cmd_path = path.join(gen_dir, "_premake"..(os.is_host("windows") and ".cmd" or ".sh"))
-    for _, sourcefile in ipairs(sourcefiles) do
-        if path.filename(sourcefile):startswith("udf_names.c") then
-            goto continue
-        end
-        local command = sed_cmd..sedpattern1..' "'..path.join("$(projectdir)", sourcefile)..'"'
-        io.printf(premake_cmd_path, command.." > "..tmp_file)
-        os.run(premake_cmd_path)
-        local outdata = io.readfile(tmp_file)
-        io.writefile(tmp_file, " ")
-        udf_names_str = udf_names_str..outdata
-        ::continue::
+]==]}
+    for _,sourcefile in ipairs(sourcefiles) do
+        -- if not path.filename(sourcefile):startswith("udf_names.c") then
+        local fullpath = path.join("$(projectdir)", sourcefile)
+        local out = _run_sed(sed_path, pattern_decl, fullpath)
+        table.insert(parts, out)
+        -- end
     end
+    table.insert(parts, "\nEXPORT UDF_Data udf_data[] = {\n")
 
-    udf_names_str = udf_names_str.."\n__declspec(dllexport) UDF_Data udf_data[] = {\n"
-
-    for _, sourcefile in ipairs(sourcefiles) do
-        if path.filename(sourcefile):startswith("udf_names.c") then
-            goto continue
+    for _,sourcefile in ipairs(sourcefiles) do
+        if not path.filename(sourcefile):startswith("udf_names.c") then
+            local fullpath = path.join("$(projectdir)", sourcefile)
+            local out = _run_sed(sed_path, pattern_data, fullpath)
+            table.insert(parts, out)
         end
-        local command = sed_cmd..sedpattern2..' "'..path.join("$(projectdir)", sourcefile)..'"'
-        io.printf(premake_cmd_path, command.." > "..tmp_file)
-        os.run(path.join(premake_cmd_path))
-        local outdata = io.readfile(tmp_file)
-        io.writefile(tmp_file, " ")
-        udf_names_str = udf_names_str..outdata
-        ::continue::
     end
-    os.rm(premake_cmd_path)
-    os.rm(tmp_file)
-    udf_names_str = udf_names_str..[==[
+    table.insert(parts, [==[
 };
-__declspec(dllexport) int n_udf_data = sizeof(udf_data)/sizeof(UDF_Data);
+EXPORT int n_udf_data = sizeof(udf_data)/sizeof(UDF_Data);
 
 #include "version.h"
-
-__declspec(dllexport) void UDF_Inquire_Release(int *major, int *minor, int *revision)
+EXPORT void UDF_Inquire_Release(int *major, int *minor, int *revision)
 {
     *major = RampantReleaseMajor;
     *minor = RampantReleaseMinor;
     *revision = RampantReleaseRevision;
 }
-]==]
-    io.print(path.join(gen_dir, "udf_names.c"), udf_names_str)
+]==])
+    local udf_names_str = table.concat(parts)
+    io.writefile(path.join(gen_dir, "udf_names.c"), udf_names_str)
 end
 
 function _generate_udfio(sourcefiles, tools_path, gen_dir)
-    -- cprint("${bright green}Generate ${white}udf_io1.h ")
-    local udf_io_str = ""
-    local resolve_cmd = '"'..path.join(tools_path, "resolve"..(os.is_host("windows") and ".exe" or ""))..'"'
-    resolve_cmd = resolve_cmd.." -udf "
-    local filelist = ""
+    local resolve = path.join(tools_path, "resolve" .. _exe_suffix())
+    local filelist_parts = {}
     for _, sourcefile in ipairs(sourcefiles) do
-        filelist = filelist.." "..path.join("$(projectdir)", sourcefile)
+        table.insert(filelist_parts, string.format('%q', path.join("$(projectdir)", sourcefile)))
     end
-    local command = resolve_cmd..filelist.." -head_file ".. path.join(gen_dir, "ud_io1.h")
-    os.run(command)
+    local filelist = table.concat(filelist_parts, " ")
+
+    local out_file = path.join(gen_dir, "ud_io1.h")
+    local command = string.format('%q -udf %s -head_file %q', resolve, filelist, out_file)
+    local ok, err = os.run(command)   -- 检查返回值
+    if not ok then
+        cprint("resolve failed: %s", err or "unknown error")
+    end
 end
 
 function main(target)
     local autogendir = target:autogendir()
 
-    -- 如果源代码时间比生成的代码新才进行处理，否则直接返回
-    local udfnamefile = path.join(autogendir, "udf_names.c")
-    for _, sourcebatch in pairs(target:sourcebatches()) do
-        for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
-            if not path.filename(sourcefile):startswith("udf_names.c") then
-                local genmtime = os.mtime(udfnamefile) -- 似乎这个os.mtime只能识别他自己生成的文件修改时间，有bug好像始终返回0
-                local srcmtime = os.mtime(sourcefile)
-                -- print(srcmtime.." : "..genmtime)
-                if srcmtime >= genmtime then
-                    local fluent_path = target:data("fluent_path")
-                    local sourcefiles = _filter_sourcefiles(target)
-                    local tools_path
-                    if os.is_host("windows") then
-                        tools_path = path.join(fluent_path, "ntbin/win64")
-                    else
-                        tools_path = path.join(fluent_path, "bin")
-                    end
-                    _generate_udfnames(sourcefiles, tools_path, autogendir)
-                    _generate_udfio(sourcefiles, tools_path, autogendir)
-                    break
-                end
-            end
+    local sourcefiles = _filter_sourcefiles(target)
+    local max_src_mtime = 0
+    for _, sourcefile in ipairs(sourcefiles) do
+        local mtime = os.mtime(sourcefile) or 0
+        if mtime > max_src_mtime then
+            max_src_mtime = mtime
         end
+    end
+
+    local gen_mtime = os.mtime(path.join(autogendir, "udf_names.c")) or 0
+    if max_src_mtime > gen_mtime then
+        local fluent_path = target:data("fluent_path")
+        local tools_path = os.is_host("windows") and path.join(fluent_path, "ntbin/win64") or path.join(fluent_path, "bin")
+        _generate_udfnames(sourcefiles, tools_path, autogendir)
+        _generate_udfio(sourcefiles, tools_path, autogendir)
     end
 
     target:add("files", path.join(autogendir, "udf_names.c"))
