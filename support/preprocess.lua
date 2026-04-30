@@ -1,12 +1,10 @@
+-- 获取源文件列表并去重
 function _filter_sourcefiles(target)
-    -- 获取源文件列表并去重
-    -- cprintf("${bright green}Filter sourcefiles:")
     local sourcefiles = {}
     for _, sourcebatch in pairs(target:sourcebatches()) do
         for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
             if not path.filename(sourcefile):startswith("udf_names.c") and not table.contains(sourcefiles, sourcefile) then
                 table.insert(sourcefiles, sourcefile)
-                -- cprintf("${white} "..sourcefile)
             end
         end
     end
