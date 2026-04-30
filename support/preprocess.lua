@@ -29,8 +29,8 @@ function _generate_udfnames(sourcefiles, tools_path, gen_dir)
     local tmp_file = os.tmpfile()
     local sed_path = path.join(tools_path, "sed"..(os.is_host("windows") and ".exe" or ""))
     local sed_cmd = '"'..sed_path..'"'..' -n '
-    sedpattern1 = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
-    sedpattern2 = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
+    local sedpattern1 = [[ "s/^.*\(\<DEFINE_[_A-Z]*([, _a-zA-Z0-9]*)\).*$/EXTERN_C \1;/p" ]]
+    local sedpattern2 = [[ "s/^.*\<DEFINE_\([_A-Z]*\)( *\([_a-zA-Z0-9]*\)[, _a-zA-Z0-9]*).*$/    \{\"\2\", (void (*)(void))\2, UDF_TYPE_\1\},/p" ]]
 
     local premake_cmd_path = path.join(gen_dir, "_premake"..(os.is_host("windows") and ".cmd" or ".sh"))
     for _, sourcefile in ipairs(sourcefiles) do
@@ -95,12 +95,12 @@ function main(target)
     local autogendir = target:autogendir()
 
     -- 如果源代码时间比生成的代码新才进行处理，否则直接返回
-    udfnamefile = path.join(autogendir, "udf_names.c")
+    local udfnamefile = path.join(autogendir, "udf_names.c")
     for _, sourcebatch in pairs(target:sourcebatches()) do
         for _, sourcefile in ipairs(sourcebatch.sourcefiles) do
             if not path.filename(sourcefile):startswith("udf_names.c") then
-                genmtime = os.mtime(udfnamefile) -- 似乎这个os.mtime只能识别他自己生成的文件修改时间，有bug好像始终返回0
-                srcmtime = os.mtime(sourcefile)
+                local genmtime = os.mtime(udfnamefile) -- 似乎这个os.mtime只能识别他自己生成的文件修改时间，有bug好像始终返回0
+                local srcmtime = os.mtime(sourcefile)
                 -- print(srcmtime.." : "..genmtime)
                 if srcmtime >= genmtime then
                     local fluent_path = target:data("fluent_path")
