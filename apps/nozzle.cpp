@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <cassert>
 #include <filesystem>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +9,13 @@
 #include "aerodynamics/material-property.hpp"
 #include "udf.hpp"
 #include "util.hpp"
+
+#ifdef RP_HOST
+#if RP_HOST
+#include <fstream>
+#include <sstream>
+#endif
+#endif
 
 namespace id {
 // wall id
@@ -178,7 +183,13 @@ static void cal_nozzle_1D_parameters(const std::string& key_prefix) {
         const real vx_e = hndp::isentropic::cal_V_by_T_total_T_static(mp, T_total, T_static_e);
         const real rho_static_e = p_ambient / (mp.Rg() * T_static_e);
 
-        const real expansion_ratio_1D = (rho_static_i * vx_i) / (rho_static_e * vx_e);
+        const real expansion_ratio_1D = [&]() {
+            real ret = (rho_static_i * vx_i) / (rho_static_e * vx_e);
+            if (!std::isfinite(ret)) {
+                ret = 0.0;
+            }
+            return ret;
+        }();
 
         vx_es.push_back(vx_e);
         ers.push_back(expansion_ratio_1D);
@@ -597,12 +608,11 @@ static void set_thetas_by_exit_area(const std::string& key_area, const std::stri
     const auto& times = timepoints[key_area];
     const auto& areas = values[key_area];
     auto& thetas = values[key_theta];
-    if (thetas.size() != 3 || times.size() < 2 || times.size() != areas.size()) {
+    if (thetas.size() < 2 || times.size() != areas.size()) {
         udf::error("{} {} {} {} {}", key_theta, thetas.size(), key_area, times.size(), areas.size());
     }
-    const real theta_init = thetas[0];
-    const real theta_mid = thetas[1];
-    const real theta_final = thetas[2];
+    const real theta_init = thetas.front();
+    const real theta_final = thetas.back();
     thetas.resize(times.size());
 
     const real area_max = *std::max_element(areas.begin(), areas.end());
@@ -619,7 +629,10 @@ static void set_thetas_by_exit_area(const std::string& key_area, const std::stri
                                   (1. - areas[i] / area_max) * (std::sin(theta_final) - std::sin(theta_init)));
         }
     } else {
-        udf::error("thetas.front() and thetas.back() cannot be the same");
+        udf::info("{}: thetas.front() equals thetas.back()", key_theta);
+        for (size_t i = 0; i < times.size(); ++i) {  // 不动
+            thetas[i] = theta_init;
+        }
     }
 
     timepoints[key_theta] = times;
